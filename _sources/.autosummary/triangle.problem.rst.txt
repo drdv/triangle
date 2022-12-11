@@ -1,0 +1,33 @@
+triangle.problem
+================
+
+.. automodule:: triangle.problem
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+   
+      Point
+      TriangleProblem
+   
+   
+
+   
+   
+   
+
+
+
