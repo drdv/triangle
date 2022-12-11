@@ -26,6 +26,7 @@ jobs:
       - name: generate sphinx docs
         run: |
           make install-local
+          apt install -y libfuse2
           . .venv/bin/activate && make docs
           touch docs/sphinx/build/html/.nojekyll
           rm docs/sphinx/build/html/.htmlcov/.gitignore
