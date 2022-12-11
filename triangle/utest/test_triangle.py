@@ -12,6 +12,6 @@ class TestPlaceholder(unittest.TestCase):
     """Utests."""
 
     def test_placeholder(self):
-        """Some test."""
+        """Test default case."""
         tp = TriangleProblem()
         self.assertEqual(tp.solve(), 140)

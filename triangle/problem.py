@@ -7,8 +7,7 @@ class Point:
     """Point with (x,y) coordinates."""
 
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        self.x, self.y = x, y
 
     def __repr__(self):
         return f"({self.x}, {self.y})"
@@ -41,7 +40,7 @@ class TriangleProblem:
         Returns
         --------
         :obj:`float`
-            Angle ``x`` in degrees.
+            Unknown angle (in degrees).
 
         """
         z = np.sin(self.a1) / np.sin(self.b1) * np.sin(self.b2) / np.sin(self.a2)
@@ -49,8 +48,8 @@ class TriangleProblem:
         c1 = z * np.sin(v)
         c2 = z * np.cos(v)
 
-        gamma2 = np.arctan2(c1, 1 + c2)
-        x = np.pi - (self.b2 + gamma2)
+        gamma_2 = np.arctan2(c1, 1 + c2)
+        x = np.pi - (self.b2 + gamma_2)
 
         return x * 180 / np.pi
 
@@ -59,61 +58,87 @@ class TriangleProblem:
         """Convert degrees to radians."""
         return deg * np.pi / 180
 
-    def plot(self, verbose=False, savefig=None):
+    def plot(self, ax=None, solve=False, annotate=False, savefig=None):
         """Plot problem.
 
         Parameters
         -----------
-        verbose : :obj:`bool`
-            Add verbose annotation.
+        ax : :obj:`AxesSubplot`
+            Axix where to plot.
+        solve : :obj:`bool`
+            Show solution or not.
+        annotate : :obj:`bool`
+            Add annotation (for default case only).
         savefig : :obj:`str` or ``None``
             Name of figure to save.
 
         """
-        AB = 1  # can be chosen arbitrarily (for the visualization)
-        v = np.pi - (self.a1 + self.a2 + self.b1 + self.b2)
-        AC = AB * np.sin(self.b1 + self.b2) / np.sin(v)
-        C = Point(np.cos(self.a1 + self.a2) * AC, np.sin(self.a1 + self.a2) * AC)
+        if ax is None:
+            _, ax = plt.subplots()
 
-        # the intersection point in the interior
-        AM = AB * np.sin(self.b1) / np.sin(np.pi - (self.a1 + self.b1))
-        M = Point(np.cos(self.a1) * AM, np.sin(self.a1) * AM)
+        A, B, C, M = self._get_points()
+        ax.plot([A.x, B.x, C.x, 0], [A.y, B.y, C.y, 0])
+        ax.plot(A.x, A.y, "bs")
+        ax.plot(B.x, B.y, "bs")
+        ax.plot(C.x, C.y, "bs")
+        ax.plot(M.x, M.y, "rs")
+        ax.plot([A.x, M.x, B.x], [A.y, M.y, B.y], "r--")
+        ax.plot([M.x, C.x], [M.y, C.y], "r--")
 
-        plt.plot([0, AB, C.x, 0], [0, 0, C.y, 0])
-        plt.plot([0], [0], "bs")
-        plt.plot([AB], [0], "bs")
-        plt.plot([C.x], [C.y], "bs")
+        if annotate:
+            self._annotate(ax)
 
-        plt.plot(M.x, M.y, "rs")
-        plt.plot([0, M.x, AB], [0, M.y, 0], "r--")
-        plt.plot([M.x, C.x], [M.y, C.y], "r--")
+        if solve:
+            ax.text(C.x, 1.05 * C.y, f"$x: {self.solve():0.1f}$")
 
-        self._annotate(C, M, verbose=verbose)
-        plt.axis("off")
+        ax.axis("off")
         if savefig is not None:
             plt.savefig(savefig)
 
-    def _annotate(self, C, M, verbose=False, fontsize=16):
-        """Annotate figure."""
+    def _get_points(self):
+        a = self.a1 + self.a2
+        b = self.b1 + self.b2
+        v = np.pi - (a + b)
+
+        AB = 1  # arbitrary
+        AC = AB * np.sin(b) / np.sin(v)
+        AM = AB * np.sin(self.b1) / np.sin(np.pi - (self.a1 + self.b1))
+
+        A = Point(0, 0)
+        B = Point(AB, 0)
+        C = Point(AC * np.cos(a), AC * np.sin(a))
+        M = Point(AM * np.cos(self.a1), AM * np.sin(self.a1))
+
+        return A, B, C, M
+
+    def _annotate(self, ax):
+        """Annotate figure for default angles only.
+
+        Warning
+        --------
+        default angles: a1=10, a2=30, b1=20, b2=20.
+
+        """
+        fontsize = 16
+
         # vertices
-        plt.text(-0.05, -0.03, "$A$", fontsize=fontsize)
-        plt.text(1.02, -0.03, "$B$", fontsize=fontsize)
-        plt.text(C.x, C.y + 0.02, "$C$", fontsize=fontsize)
-        plt.text(M.x - 0.065, M.y, "$M$", fontsize=fontsize)
+        ax.text(-0.05, -0.03, "$A$", fontsize=fontsize)
+        ax.text(1.02, -0.03, "$B$", fontsize=fontsize)
+        ax.text(0.5, 0.44, "$C$", fontsize=fontsize)
+        ax.text(0.61, 0.118, "$M$", fontsize=fontsize)
 
-        if verbose:
-            # angles
-            plt.text(0.17, 0.008, "$\\alpha_1$", fontsize=fontsize)
-            plt.text(0.08, 0.04, "$\\alpha_2$", fontsize=fontsize)
-            plt.text(0.83, 0.015, "$\\beta_1$", fontsize=fontsize)
-            plt.text(0.83, 0.08, "$\\beta_2$", fontsize=fontsize)
-            plt.text(0.46, 0.37, "$\\gamma_1$", fontsize=fontsize)
-            plt.text(0.56, 0.32, "$\\gamma_2$", fontsize=fontsize)
+        # angles
+        ax.text(0.17, 0.008, "$\\alpha_1$", fontsize=fontsize)
+        ax.text(0.08, 0.04, "$\\alpha_2$", fontsize=fontsize)
+        ax.text(0.83, 0.015, "$\\beta_1$", fontsize=fontsize)
+        ax.text(0.83, 0.08, "$\\beta_2$", fontsize=fontsize)
+        ax.text(0.46, 0.37, "$\\gamma_1$", fontsize=fontsize)
+        ax.text(0.56, 0.32, "$\\gamma_2$", fontsize=fontsize)
 
-            # lengths of line segments
-            plt.text(0.35, 0.08, "$s_1$", fontsize=fontsize)
-            plt.text(0.71, 0.07, "$s_2$", fontsize=fontsize)
-            plt.text(0.53, 0.25, "$s_3$", fontsize=fontsize)
+        # lengths of line segments
+        ax.text(0.35, 0.08, "$s_1$", fontsize=fontsize)
+        ax.text(0.71, 0.07, "$s_2$", fontsize=fontsize)
+        ax.text(0.53, 0.25, "$s_3$", fontsize=fontsize)
 
-            # unknown angle
-            plt.text(0.7, 0.125, "$x$", fontsize=fontsize)
+        # unknown angle
+        ax.text(0.7, 0.125, "$x$", fontsize=fontsize)
