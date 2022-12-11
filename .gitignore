@@ -1,0 +1,8 @@
+.ipynb_checkpoints
+.pylint_report.json
+.autosummary
+__pycache__
+dist
+build
+_version.py
+*.egg-info
