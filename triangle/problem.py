@@ -9,6 +9,29 @@ class Point:
     def __init__(self, x, y):
         self.x, self.y = x, y
 
+    def __sub__(self, other):
+        return Point(self.x - other.x, self.y - other.y)
+
+    def __sum__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+
+    def __mul__(self, other):
+        if isinstance(other, Point):
+            return self.x * other.x + self.y * other.y
+        elif isinstance(other, (int, float)):
+            return Point(other * self.x, other * self.y)
+        else:
+            raise ValueError(f"Unknown operand {other}")
+
+    def __rmul__(self, other):
+        if isinstance(other, (int, float)):
+            return Point(other * self.x, other * self.y)
+        raise ValueError(f"Unknown operand {other}")
+
+    @property
+    def norm(self):
+        return np.sqrt(self.x**2 + self.y**2)
+
     def __repr__(self):
         return f"({self.x}, {self.y})"
 
@@ -53,6 +76,18 @@ class TriangleProblem:
 
         return x * 180 / np.pi
 
+    def solve1(self):
+        """Another solution.
+
+        Note
+        -----
+        Without loss of generality, assume that A is the origin and AB = 1.
+
+        """
+        _, B, C, M = self.get_points()
+        v, u = C - M, B - M
+        return np.arccos((v * u) / (v.norm * u.norm)) * 180 / np.pi
+
     @staticmethod
     def deg2rad(deg):
         """Convert degrees to radians."""
@@ -76,7 +111,7 @@ class TriangleProblem:
         if ax is None:
             _, ax = plt.subplots()
 
-        A, B, C, M = self._get_points()
+        A, B, C, M = self.get_points()
         ax.plot([A.x, B.x, C.x, 0], [A.y, B.y, C.y, 0])
         ax.plot(A.x, A.y, "bs")
         ax.plot(B.x, B.y, "bs")
@@ -95,7 +130,7 @@ class TriangleProblem:
         if savefig is not None:
             plt.savefig(savefig)
 
-    def _get_points(self):
+    def get_points(self):
         a = self.a1 + self.a2
         b = self.b1 + self.b2
         v = np.pi - (a + b)
