@@ -21,4 +21,10 @@ triangle.problem.Point
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Point.norm
+   
    

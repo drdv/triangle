@@ -17,8 +17,10 @@ triangle.problem.TriangleProblem
       :nosignatures:
    
       ~TriangleProblem.deg2rad
+      ~TriangleProblem.get_points
       ~TriangleProblem.plot
       ~TriangleProblem.solve
+      ~TriangleProblem.solve1
    
    
 
