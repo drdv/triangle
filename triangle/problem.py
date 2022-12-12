@@ -81,7 +81,7 @@ class TriangleProblem:
 
         Note
         -----
-        Without loss of generality, assume that A is the origin and AB = 1.
+        Without loss of generality, assume that length of AB == 1.
 
         """
         _, B, C, M = self.get_points()
